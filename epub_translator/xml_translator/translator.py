@@ -77,6 +77,30 @@ class XMLTranslator:
         interrupt_block_element: Callable[[Element], Element] | None = None,
         on_fill_failed: Callable[[FillFailedEvent], None] | None = None,
     ) -> Generator[tuple[Element, T], None, None]:
+        for element, mappings, task in self.translate_mapped_elements(
+            tasks=tasks,
+            concurrency=concurrency,
+            interrupt_source_text_segments=interrupt_source_text_segments,
+            interrupt_translated_text_segments=interrupt_translated_text_segments,
+            interrupt_block_element=interrupt_block_element,
+            on_fill_failed=on_fill_failed,
+        ):
+            translated_element = submit(
+                element=element,
+                action=task.action,
+                mappings=mappings,
+            )
+            yield translated_element, task.payload
+
+    def translate_mapped_elements(
+        self,
+        tasks: Iterable[TranslationTask[T]],
+        concurrency: int = 1,
+        interrupt_source_text_segments: Callable[[Iterable[TextSegment]], Iterable[TextSegment]] | None = None,
+        interrupt_translated_text_segments: Callable[[Iterable[TextSegment]], Iterable[TextSegment]] | None = None,
+        interrupt_block_element: Callable[[Element], Element] | None = None,
+        on_fill_failed: Callable[[FillFailedEvent], None] | None = None,
+    ) -> Generator[tuple[Element, list[InlineSegmentMapping], TranslationTask[T]], None, None]:
         element2task: dict[int, TranslationTask[T]] = {}
         callbacks = warp_callbacks(
             interrupt_source_text_segments=interrupt_source_text_segments,
@@ -101,12 +125,7 @@ class XMLTranslator:
         ):
             task = element2task.get(id(element), None)
             if task:
-                translated_element = submit(
-                    element=element,
-                    action=task.action,
-                    mappings=mappings,
-                )
-                yield translated_element, task.payload
+                yield element, mappings, task
 
     def _translate_inline_segments(
         self,

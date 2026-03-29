@@ -118,7 +118,7 @@ translate(
     source_path: PathLike | str,       # 源 EPUB 文件路径
     target_path: PathLike | str,       # 输出 EPUB 文件路径
     target_language: str,              # 目标语言 (例如 "Chinese", "English")
-    submit: SubmitKind,                # 如何插入译文 (REPLACE, APPEND_TEXT, 或 APPEND_BLOCK)
+    submit: SubmitKind | Iterable[SubmitKind],  # 如何插入译文 (REPLACE, APPEND_TEXT, 或 APPEND_BLOCK)。一个或多个输出模式
     user_prompt: str | None = None,    # 自定义翻译指令
     max_retries: int = 5,              # 翻译失败的最大重试次数
     max_group_tokens: int = 2600,      # 每个翻译组的最大 token 数
@@ -135,7 +135,7 @@ translate(
 
 #### 提交模式
 
-`submit` 参数控制译文如何插入到文档中。使用 `SubmitKind` 枚举类型指定插入模式：
+`submit` 参数控制译文如何插入到文档中。你可以传入单个 `SubmitKind`，也可以传入多个 `SubmitKind`，在一次翻译中产出多本 EPUB：
 
 ```python
 from epub_translator import SubmitKind
@@ -174,7 +174,18 @@ translate(
     submit=SubmitKind.REPLACE,
     llm=llm,
 )
+
+# 一次同时输出单语版与双语版
+translate(
+    source_path="source.epub",
+    target_path="translated.epub",
+    target_language=language.CHINESE,
+    submit=[SubmitKind.REPLACE, SubmitKind.APPEND_BLOCK],
+    llm=llm,
+)
 ```
+
+当 `submit` 传入多个模式时，`target_path` 会被视为基础文件名。例如 `translated.epub` 会输出 `translated.replace.epub` 和 `translated.append_block.epub`。
 
 #### 语言常量
 

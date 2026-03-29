@@ -118,7 +118,7 @@ translate(
     source_path: PathLike | str,       # Source EPUB file path
     target_path: PathLike | str,       # Output EPUB file path
     target_language: str,              # Target language (e.g., "English", "Chinese")
-    submit: SubmitKind,                # How to insert translations (REPLACE, APPEND_TEXT, or APPEND_BLOCK)
+    submit: SubmitKind | Iterable[SubmitKind],  # How to insert translations (REPLACE, APPEND_TEXT, or APPEND_BLOCK). One or more output modes
     user_prompt: str | None = None,    # Custom translation instructions
     max_retries: int = 5,              # Maximum retries for failed translations
     max_group_tokens: int = 2600,      # Maximum tokens per translation group
@@ -135,7 +135,7 @@ translate(
 
 #### Submit Modes
 
-The `submit` parameter controls how translated content is inserted into the document. Use `SubmitKind` enum to specify the insertion mode:
+The `submit` parameter controls how translated content is inserted into the document. You can pass either a single `SubmitKind` or an iterable of `SubmitKind` values to produce multiple EPUB outputs from one translation run:
 
 ```python
 from epub_translator import SubmitKind
@@ -174,7 +174,18 @@ translate(
     submit=SubmitKind.REPLACE,
     llm=llm,
 )
+
+# Produce both target-language-only and bilingual outputs in one run
+translate(
+    source_path="source.epub",
+    target_path="translated.epub",
+    target_language=language.ENGLISH,
+    submit=[SubmitKind.REPLACE, SubmitKind.APPEND_BLOCK],
+    llm=llm,
+)
 ```
+
+When `submit` contains multiple modes, `target_path` is treated as a base filename. For example, `translated.epub` produces `translated.replace.epub` and `translated.append_block.epub`.
 
 #### Language Constants
 

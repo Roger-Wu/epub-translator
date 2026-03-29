@@ -18,6 +18,16 @@ def main() -> None:
     parser.add_argument(
         "-l", "--lan", type=str, default="Chinese", help="Target language for translation (default: Chinese)"
     )
+    parser.add_argument(
+        "-s",
+        "--submit",
+        action="append",
+        choices=["replace", "append_text", "append_block"],
+        help=(
+            "Output mode. Repeat this option to produce multiple outputs. "
+            "Default: replace + append_block."
+        ),
+    )
     args = parser.parse_args()
     source_path = Path(args.source_path)
 
@@ -26,6 +36,7 @@ def main() -> None:
         sys.exit(1)
 
     target_language = args.lan
+    submit_modes = _parse_submit_modes(args.submit)
 
     temp_path = read_and_clean_temp()
     translation_llm, fill_llm = load_llm(
@@ -57,7 +68,7 @@ def main() -> None:
             fill_llm=fill_llm,
             concurrency=4,
             target_language=target_language,
-            submit=SubmitKind.APPEND_BLOCK,
+            submit=submit_modes,
             source_path=source_path,
             target_path=temp_path / "translated.epub",
             on_progress=on_progress,
@@ -91,6 +102,18 @@ def main() -> None:
     print(f"  Input cache tokens: {input_cache_combined:,}")
     print(f"  Output tokens:      {output_combined:,}")
     print("=" * 50 + "\n")
+
+
+def _parse_submit_modes(submit_values: list[str] | None) -> list[SubmitKind]:
+    if not submit_values:
+        return [SubmitKind.REPLACE, SubmitKind.APPEND_BLOCK]
+
+    mapping = {
+        "replace": SubmitKind.REPLACE,
+        "append_text": SubmitKind.APPEND_TEXT,
+        "append_block": SubmitKind.APPEND_BLOCK,
+    }
+    return [mapping[value] for value in submit_values]
 
 
 if __name__ == "__main__":
