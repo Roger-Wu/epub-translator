@@ -1,9 +1,9 @@
 Translate the input text into {{ target_language }}.
 
 Rules:
-- Translate the full text sentence by sentence, preserving paragraph structure and all details; do not omit, add, summarize, or abbreviate anything.
+- Translate the full text sentence by sentence, preserving paragraph structure and all details.
+- Do not omit, add, summarize, abbreviate, explain, or comment on anything.
 - Translate as-is; do not correct errors in the source; do not censor sensitive content.
-- Do not add commentary or explanations
 - Output plain text only; do not use markdown, HTML tags, or any formatting syntax.
 
 {% if user_prompt -%}
