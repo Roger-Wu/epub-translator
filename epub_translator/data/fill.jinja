@@ -1,15 +1,6 @@
 ## Task
 
-You are an XML translation and reconstruction assistant.
-Place the translated text into the XML template while preserving the structure exactly.
-
-You will receive:
-
-1. `Source text`: the original plain text
-2. `XML template`: the required XML structure
-3. `Translated text`: the translation in plain text
-
-Return exactly one valid XML block and nothing else.
+Given `Source text`, `XML template`, and `Translated text`, return exactly one valid `<xml>...</xml>` block containing the translated reconstruction of `XML template` while preserving its XML structure.
 
 ## Example
 
@@ -21,64 +12,32 @@ The review of On Liberty appeared in Nature in 1860.
 
 XML template:
 ```XML
-<xml>
-  <p id="1">
-    The review of
-    <span id="2">On Liberty</span>
-    appeared in
-    <span id="3">Nature</span>
-    in
-    <a id="4">1860</a>
-    .
-  </p>
-</xml>
+<xml><p class="intro">The review of <a id="1">On Liberty</a> appeared in <a id="2">Nature</a> in <span id="3">1860</span>.</p></xml>
 ```
 
 Translated text:
 这篇关于《论自由》的书评发表于1860年的《自然》上。
 ````
 
-Correct output:
+Output:
 
-```
-<xml>
-  <p id="1">
-    这篇关于
-    <span id="2">《论自由》</span>
-    的书评发表于
-    <a id="4">1860</a>
-    年的
-    <span id="3">《自然》</span>
-    上。
-  </p>
-</xml>
+```xml
+<xml><p class="intro">这篇关于<a id="1">《论自由》</a>的书评发表于<span id="3">1860</span>年的<a id="2">《自然》</a>上。</p></xml>
 ```
 
-## Notes
+## Priorities
 
-- Prioritize structure over fluency
-- Preserve the exact XML structure from the template
-- Preserve exact tag names, nesting, order, attributes, and existing `id`
-- Do not add, remove, rename, or merge required tags or `id`
-- For elements with `id`, match by semantic meaning
-- For elements without `id`, match by structural position
-- If translation changes word order, move content to the correct semantic position
-- If natural wording conflicts with required structure, preserve structure
-- If no clean translated match exists for a required slot, use source-language text only as a last resort
+1. XML validity
+2. Preserve the XML structure of the template
+3. Natural and faithful translation
 
----
+## Rules
 
-OUTPUT FORMAT:
-```
-<xml>
-  ... your filled XML here ...
-</xml>
-```
-
-CRITICAL:
-- Return ONLY the XML block, no explanations
-- Do NOT include example blocks or alternatives
-- If unsure, make best attempt based on pattern
-- The system will provide detailed error messages if corrections needed
-
-Begin.
+- Do not add, remove, rename, split, merge, or reparent tags.
+- Do not invent or omit content.
+- Keep tag names, attributes, nesting, and parent-child relationships unchanged.
+- Sibling order may change if needed for natural translation.
+- Use `Translated text` as the primary wording. Make minimal wording adjustments only when needed to fit the XML structure cleanly.
+- Map translated content to the corresponding elements by meaning and context.
+- If a required slot cannot be filled from the translation, use source-language text only as a last resort.
+- Output ONLY the XML block, nothing else.
