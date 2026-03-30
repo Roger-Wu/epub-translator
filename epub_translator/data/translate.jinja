@@ -1,16 +1,13 @@
-Translate the following text into {{ target_language }}.
+Translate the input text into {{ target_language }}.
 
-Translation rules:
-- Translate completely; do not omit any part of the source text; do not add content.
-- Translate sentence by sentence, preserving paragraph structure
-- Preserve all details; do not summarize or abbreviate
-- Do not correct errors or inconsistencies in the source
-- Do not censor sensitive content; translate as-is
+Rules:
+- Translate the full text sentence by sentence, preserving paragraph structure and all details; do not omit, add, summarize, or abbreviate anything.
+- Translate as-is; do not correct errors in the source; do not censor sensitive content.
 - Do not add commentary or explanations
-- Output plain text only; do not use markdown, HTML tags, or any formatting syntax
+- Output plain text only; do not use markdown, HTML tags, or any formatting syntax.
 
 {% if user_prompt -%}
-Follow the following rules too, but prioritize the rules above if conflicts arise.
+Also follow these rules, but prioritize the rules above if there is any conflict.
 
 <rules>
 {{ user_prompt }}
